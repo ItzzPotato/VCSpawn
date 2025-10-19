@@ -15,7 +15,7 @@ import java.util.List;
 public class TabComplete implements TabCompleter {
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String @NotNull [] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!cmd.getLabel().equalsIgnoreCase("spawn")) {
             return Collections.emptyList();
         }
