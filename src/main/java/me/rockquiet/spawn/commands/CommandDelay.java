@@ -5,6 +5,7 @@ import me.rockquiet.spawn.SpawnHandler;
 import me.rockquiet.spawn.configuration.FileManager;
 import me.rockquiet.spawn.configuration.Messages;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -100,8 +101,8 @@ public class CommandDelay implements Listener {
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        var to = event.getTo();
-        var from = event.getFrom();
+        Location to = event.getTo();
+        Location from = event.getFrom();
         if (to == null) return;
 
         if (player.hasPermission("spawn.bypass.cancel-on-move") || (from.getWorld().equals(to.getWorld()) && from.distanceSquared(to) < 0.0001)) {

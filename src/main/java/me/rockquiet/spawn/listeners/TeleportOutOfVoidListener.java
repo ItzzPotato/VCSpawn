@@ -2,6 +2,7 @@ package me.rockquiet.spawn.listeners;
 
 import me.rockquiet.spawn.SpawnHandler;
 import me.rockquiet.spawn.configuration.FileManager;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,8 +23,8 @@ public class TeleportOutOfVoidListener implements Listener {
     @EventHandler
     public void playerInVoid(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        var to = event.getTo();
-        var from = event.getFrom();
+        Location to = event.getTo();
+        Location from = event.getFrom();
         if (to == null) return;
 
         if (player.hasPermission("spawn.bypass.void-teleport")
