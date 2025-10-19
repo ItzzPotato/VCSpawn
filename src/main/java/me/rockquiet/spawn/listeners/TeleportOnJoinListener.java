@@ -1,7 +1,9 @@
 package me.rockquiet.spawn.listeners;
 
+import me.rockquiet.spawn.Spawn;
 import me.rockquiet.spawn.SpawnHandler;
 import me.rockquiet.spawn.configuration.FileManager;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,20 +22,21 @@ public class TeleportOnJoinListener implements Listener {
     }
 
     @EventHandler
-public void onJoin(org.bukkit.event.player.PlayerJoinEvent event) {
-    Player player = event.getPlayer();
-    YamlConfiguration config = fileManager.getYamlConfig();
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        YamlConfiguration config = fileManager.getYamlConfig();
 
-    boolean allJoins = config.getBoolean("teleport-on-join.enabled", false);
-    boolean firstJoin = config.getBoolean("teleport-on-first-join.enabled", false);
+        boolean allJoins = config.getBoolean("teleport-on-join.enabled", false);
+        boolean firstJoin = config.getBoolean("teleport-on-first-join.enabled", false);
 
-    if (!allJoins && !(firstJoin && !player.hasPlayedBefore())) return;
-    if (player.hasPermission("spawn.bypass.join-teleport")) return;
-    if (!player.hasPermission("spawn.bypass.world-list") && !spawnHandler.isEnabledInWorld(player.getWorld())) return;
-    if (!spawnHandler.spawnExists()) return;
+        if (!allJoins && !(firstJoin && !player.hasPlayedBefore())) return;
+        if (player.hasPermission("spawn.bypass.join-teleport")) return;
+        if (!player.hasPermission("spawn.bypass.world-list") && !spawnHandler.isEnabledInWorld(player.getWorld())) return;
+        if (!spawnHandler.spawnExists()) return;
 
-    org.bukkit.Bukkit.getScheduler().runTask(me.rockquiet.spawn.Spawn.getPlugin(me.rockquiet.spawn.Spawn.class), () -> {
-        if (!player.isOnline()) return;
-        spawnHandler.teleportPlayer(player);
-    });
+        Bukkit.getScheduler().runTask(Spawn.getPlugin(Spawn.class), () -> {
+            if (!player.isOnline()) return;
+            spawnHandler.teleportPlayer(player);
+        });
+    }
 }
