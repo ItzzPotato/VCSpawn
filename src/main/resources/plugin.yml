@@ -1,74 +1,25 @@
 name: Spawn
-version: '${project.version}'
 main: me.rockquiet.spawn.Spawn
-api-version: 1.13
+version: 2.4.2-fixed
+api-version: '1.20'
 author: rockquiet
-description: Highly configurable spawn plugin. Teleport to a custom spawnpoint by command or on specific events.
-
 commands:
   spawn:
-    description: teleport to spawn
+    description: Teleport to spawn
+    usage: /spawn
     permission: spawn.use
-
 permissions:
   spawn.use:
-    description: teleport to spawn
     default: true
-  spawn.bypass.cooldown:
-    description: bypass the teleport cooldown
-    default: op
-  spawn.bypass.delay:
-    description: bypass the teleport delay
-    default: op
-  spawn.bypass.cancel-on-move:
-    description: bypass the teleport cancel on move
-    default: op
-  spawn.bypass.void-teleport:
-    description: bypass the void teleport
+  spawn.bypass.join-teleport:
     default: op
   spawn.bypass.respawn-teleport:
-    description: bypass the respawn teleport
     default: op
-  spawn.bypass.join-teleport:
-    description: bypass the join teleport
-    default: op
-  spawn.bypass.world-change:
-    description: bypass the world change teleport
+  spawn.bypass.world-change-teleport:
     default: op
   spawn.bypass.world-list:
-    description: bypass the world-list
     default: op
-  spawn.bypass.gamemode-restriction:
-    description: bypass the gamemode-restriction
+  spawn.bypass.void-teleport:
     default: op
-  spawn.others:
-    description: teleport another player to spawn
+  spawn.bypass.cancel-on-move:
     default: op
-  spawn.set:
-    description: set spawn at current location
-    default: op
-  spawn.reload:
-    description: reload all files
-    default: op
-  spawn.bypass.*:
-    default: false
-    description: grants all bypass permissions
-    children:
-      spawn.bypass.cooldown: true
-      spawn.bypass.delay: true
-      spawn.bypass.cancel-on-move: true
-      spawn.bypass.void-teleport: true
-      spawn.bypass.respawn-teleport: true
-      spawn.bypass.join-teleport: true
-      spawn.bypass.world-change: true
-      spawn.bypass.world-list: true
-      spawn.bypass.gamemode-restriction: true
-  spawn.*:
-    default: false
-    description: grants all permissions of the plugin
-    children:
-      spawn.use: true
-      spawn.bypass.*: true
-      spawn.others: true
-      spawn.set: true
-      spawn.reload: true

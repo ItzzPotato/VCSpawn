@@ -31,24 +31,27 @@ public class TeleportOnWorldChangeListener implements Listener {
     }
 
     private void onWorldChange(Player player, boolean isJoining) {
-        YamlConfiguration config = fileManager.getYamlConfig();
+    YamlConfiguration config = fileManager.getYamlConfig();
 
-        if (player.hasPermission("spawn.bypass.world-change") || !config.getBoolean("teleport-on-world-change.enabled")) {
-            return;
-        }
-
-        if (!player.hasPermission("spawn.bypass.world-list") && !spawnHandler.isEnabledInWorld(player.getWorld())) {
-            return;
-        }
-
-        if (player.getWorld().equals(spawnHandler.getSpawn().getWorld())) {
-            return;
-        }
-
-        if (isJoining && !config.getBoolean("teleport-on-world-change.check-on-join")) {
-            return;
-        }
-
-        spawnHandler.teleportPlayer(player);
+    if (player.hasPermission("spawn.bypass.world-change-teleport") || !config.getBoolean("teleport-on-world-change.enabled")) {
+        return;
     }
+
+    if (!player.hasPermission("spawn.bypass.world-list") && !spawnHandler.isEnabledInWorld(player.getWorld())) {
+        return;
+    }
+
+    if (isJoining && !config.getBoolean("teleport-on-world-change.check-on-join")) {
+        return;
+    }
+
+    if (!spawnHandler.spawnExists() || spawnHandler.getSpawn() == null || spawnHandler.getSpawn().getWorld() == null) {
+        return;
+    }
+
+    if (player.getWorld().equals(spawnHandler.getSpawn().getWorld())) {
+        return;
+    }
+
+    spawnHandler.teleportPlayer(player);
 }

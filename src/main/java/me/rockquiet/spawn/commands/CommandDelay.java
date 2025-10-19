@@ -99,38 +99,27 @@ public class CommandDelay implements Listener {
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
-        Player player = event.getPlayer();
+    Player player = event.getPlayer();
+    var to = event.getTo();
+    var from = event.getFrom();
+    if (to == null) return;
 
-        if (player.hasPermission("spawn.bypass.cancel-on-move") || (event.getFrom().distanceSquared(event.getTo()) < 0.01)) {
-            return;
-        }
-
-        UUID playerUUID = player.getUniqueId();
-
-        if (!delay.containsKey(playerUUID)) {
-            return;
-        }
-
-        if (fileManager.getYamlConfig().getBoolean("teleport-delay.cancel-on-move")) {
-            delay.get(playerUUID).cancel();
-            delay.remove(playerUUID);
-
-            clearBlindness(player);
-
-            messageManager.sendMessage(player, "teleport-canceled");
-        }
+    if (player.hasPermission("spawn.bypass.cancel-on-move") || (from.getWorld().equals(to.getWorld()) && from.distanceSquared(to) < 0.0001)) {
+        return;
     }
 
-    @EventHandler
-    public void onLeave(PlayerQuitEvent event) {
-        Player player = event.getPlayer();
-        UUID playerUUID = player.getUniqueId();
+    UUID playerUUID = player.getUniqueId();
 
-        if (delay.containsKey(playerUUID)) {
-            delay.get(playerUUID).cancel();
-            delay.remove(playerUUID);
+    if (!delay.containsKey(playerUUID)) {
+        return;
+    }
 
-            clearBlindness(player);
-        }
+    if (fileManager.getYamlConfig().getBoolean("teleport-delay.cancel-on-move")) {
+        delay.get(playerUUID).cancel();
+        delay.remove(playerUUID);
+
+        clearBlindness(player);
+
+        messageManager.sendMessage(player, "teleport-canceled");
     }
 }

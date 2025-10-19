@@ -20,22 +20,20 @@ public class TeleportOnJoinListener implements Listener {
     }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent event) {
-        YamlConfiguration config = fileManager.getYamlConfig();
-        Player player = event.getPlayer();
+public void onJoin(org.bukkit.event.player.PlayerJoinEvent event) {
+    Player player = event.getPlayer();
+    YamlConfiguration config = fileManager.getYamlConfig();
 
-        if (player.hasPermission("spawn.bypass.join-teleport") || !config.getBoolean("teleport-on-join.enabled")) {
-            return;
-        }
+    boolean allJoins = config.getBoolean("teleport-on-join.enabled", false);
+    boolean firstJoin = config.getBoolean("teleport-on-first-join.enabled", false);
 
-        if (!player.hasPermission("spawn.bypass.world-list") && !spawnHandler.isEnabledInWorld(player.getWorld())) {
-            return;
-        }
+    if (!allJoins && !(firstJoin && !player.hasPlayedBefore())) return;
+    if (player.hasPermission("spawn.bypass.join-teleport")) return;
+    if (!player.hasPermission("spawn.bypass.world-list") && !spawnHandler.isEnabledInWorld(player.getWorld())) return;
+    if (!spawnHandler.spawnExists()) return;
 
-        if (player.hasPlayedBefore() && config.getBoolean("teleport-on-join.only-first-join")) {
-            return;
-        }
-
+    org.bukkit.Bukkit.getScheduler().runTask(me.rockquiet.spawn.Spawn.getPlugin(me.rockquiet.spawn.Spawn.class), () -> {
+        if (!player.isOnline()) return;
         spawnHandler.teleportPlayer(player);
-    }
+    });
 }

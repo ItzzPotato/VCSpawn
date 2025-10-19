@@ -61,36 +61,25 @@ public class SpawnHandler {
     }
 
     public Location loadSpawn() {
-        if (!isLocationConfigValid()) {
-            return null;
-        }
-
-        final YamlConfiguration location = fileManager.getYamlLocation();
-        return new Location(
-                Bukkit.getWorld(location.getString(WORLD_KEY)),
-                location.getDouble(X_KEY),
-                location.getDouble(Y_KEY),
-                location.getDouble(Z_KEY),
-                (float) location.getDouble(YAW_KEY),
-                (float) location.getDouble(PITCH_KEY)
-        );
+    if (!isLocationConfigValid()) {
+        return null;
     }
 
-    private boolean isLocationConfigValid() {
-        final YamlConfiguration location = fileManager.getYamlLocation();
-
-        return location.getString(WORLD_KEY) != null
-                && location.get(X_KEY) != null
-                && location.get(Y_KEY) != null
-                && location.get(Z_KEY) != null
-                && location.get(YAW_KEY) != null
-                && location.get(PITCH_KEY) != null;
+    final YamlConfiguration location = fileManager.getYamlLocation();
+    World world = Bukkit.getWorld(location.getString(WORLD_KEY));
+    if (world == null) {
+        plugin.getLogger().warning("Spawn world '" + location.getString(WORLD_KEY) + "' is not loaded. Teleports will be skipped.");
+        return null;
     }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public boolean spawnExists() {
-        return spawnLocation != null || isLocationConfigValid();
-    }
+    return new Location(
+            world,
+            location.getDouble(X_KEY),
+            location.getDouble(Y_KEY),
+            location.getDouble(Z_KEY),
+            (float) location.getDouble(YAW_KEY),
+            (float) location.getDouble(PITCH_KEY)
+    );
+}
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isEnabledInWorld(World world) {
@@ -98,7 +87,7 @@ public class SpawnHandler {
         final List<String> worldList = config.getStringList("plugin.world-list");
         final String worldName = world.getName();
 
-        switch (config.getString("plugin.list-type").toLowerCase(Locale.ROOT)) {
+        switch (config.getString("plugin.list-type", "disabled").toLowerCase(Locale.ROOT)) {
             case "whitelist":
                 return worldList.contains(worldName);
             case "blacklist":
@@ -165,14 +154,14 @@ public class SpawnHandler {
                     // you probably do not want to accidentally crash your server
                     int particleAmountLegacy = Math.min(particleAmount, 2000);
                     // display particles for player that teleported
-                    for (int p = 0; p <= particleAmountLegacy; p++) {
+                    for (int p = 0; p < particleAmountLegacy; p++) {
                         player.playEffect(spawnLocation, effect, null);
                     }
                     // display particles for other players
                     player.getNearbyEntities(16, 16, 16).stream()
                             .filter(entity -> entity instanceof Player && ((Player) entity).canSee(player))
                             .forEach(entity -> {
-                                for (int p = 0; p <= particleAmountLegacy; p++) {
+                                for (int p = 0; p < particleAmountLegacy; p++) {
                                     ((Player) entity).playEffect(spawnLocation, effect, null);
                                 }
                             });
@@ -184,15 +173,16 @@ public class SpawnHandler {
     }
 
     public void playSound(Player player) {
-        final YamlConfiguration config = fileManager.getYamlConfig();
+    final YamlConfiguration config = fileManager.getYamlConfig();
 
-        if (config.getBoolean("sounds.enabled")) {
-            String sound = config.getString("sounds.sound");
-            try {
-                player.playSound(getSpawn(), Sound.valueOf(sound), (float) config.getDouble("sounds.volume"), (float) config.getDouble("sounds.pitch"));
-            } catch (Exception e) {
-                plugin.getLogger().warning("The sound " + sound + " does not exist in this Minecraft version!");
-            }
+    if (config.getBoolean("sounds.enabled")) {
+        String sound = config.getString("sounds.sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
+        float volume = (float) config.getDouble("sounds.volume", 1.0);
+        float pitch = (float) config.getDouble("sounds.pitch", 1.0);
+        try {
+            player.playSound(player.getLocation(), Sound.valueOf(sound.toUpperCase(Locale.ROOT)), volume, pitch);
+        } catch (Exception e) {
+            plugin.getLogger().warning("The sound " + sound + " does not exist in this Minecraft version!");
         }
     }
 }

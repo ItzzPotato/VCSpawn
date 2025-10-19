@@ -21,20 +21,25 @@ public class TeleportOutOfVoidListener implements Listener {
 
     @EventHandler
     public void playerInVoid(PlayerMoveEvent event) {
-        Player player = event.getPlayer();
+    Player player = event.getPlayer();
+    var to = event.getTo();
+    var from = event.getFrom();
+    if (to == null) return;
 
-        if (player.hasPermission("spawn.bypass.void-teleport") || event.getFrom().getY() == event.getTo().getY() || (event.getFrom().distanceSquared(event.getTo()) < 0.01)) {
-            return;
-        }
+    if (player.hasPermission("spawn.bypass.void-teleport") 
+            || (from.getWorld().equals(to.getWorld()) && from.distanceSquared(to) < 0.0001)
+            || from.getY() == to.getY()) {
+        return;
+    }
 
-        if (!player.hasPermission("spawn.bypass.world-list") && !spawnHandler.isEnabledInWorld(player.getWorld())) {
-            return;
-        }
+    if (!player.hasPermission("spawn.bypass.world-list") && !spawnHandler.isEnabledInWorld(player.getWorld())) {
+        return;
+    }
 
-        YamlConfiguration config = fileManager.getYamlConfig();
+    YamlConfiguration config = fileManager.getYamlConfig();
 
-        if (config.getBoolean("teleport-out-of-void.enabled") && (player.getLocation().getBlockY() <= config.getInt("teleport-out-of-void.check-height"))) {
-            spawnHandler.teleportPlayer(player);
-        }
+    if (config.getBoolean("teleport-out-of-void.enabled") && (to.getBlockY() <= config.getInt("teleport-out-of-void.check-height", -64))) {
+        if (!spawnHandler.spawnExists()) return;
+        spawnHandler.teleportPlayer(player);
     }
 }

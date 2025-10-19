@@ -49,7 +49,7 @@ public class MessageManager implements Messages {
                 .replace("&e", "<yellow>")
                 .replace("&f", "<white>")
                 // formatting codes
-                .replace("&k", "<obf>")     // obfuscated
+                .replace("&k", "<obfuscated>")     // obfuscated
                 .replace("&l", "<b>")       // bold
                 .replace("&m", "<st>")      // strikethrough
                 .replace("&n", "<u>")       // underlined
