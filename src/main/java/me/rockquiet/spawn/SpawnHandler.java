@@ -61,25 +61,25 @@ public class SpawnHandler {
     }
 
     public Location loadSpawn() {
-    if (!isLocationConfigValid()) {
-        return null;
-    }
+        if (!isLocationConfigValid()) {
+            return null;
+        }
 
-    final YamlConfiguration location = fileManager.getYamlLocation();
-    World world = Bukkit.getWorld(location.getString(WORLD_KEY));
-    if (world == null) {
-        plugin.getLogger().warning("Spawn world '" + location.getString(WORLD_KEY) + "' is not loaded. Teleports will be skipped.");
-        return null;
+        final YamlConfiguration location = fileManager.getYamlLocation();
+        World world = Bukkit.getWorld(location.getString(WORLD_KEY));
+        if (world == null) {
+            plugin.getLogger().warning("Spawn world '" + location.getString(WORLD_KEY) + "' is not loaded. Teleports will be skipped.");
+            return null;
+        }
+        return new Location(
+                world,
+                location.getDouble(X_KEY),
+                location.getDouble(Y_KEY),
+                location.getDouble(Z_KEY),
+                (float) location.getDouble(YAW_KEY),
+                (float) location.getDouble(PITCH_KEY)
+        );
     }
-    return new Location(
-            world,
-            location.getDouble(X_KEY),
-            location.getDouble(Y_KEY),
-            location.getDouble(Z_KEY),
-            (float) location.getDouble(YAW_KEY),
-            (float) location.getDouble(PITCH_KEY)
-    );
-}
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isEnabledInWorld(World world) {
@@ -173,16 +173,36 @@ public class SpawnHandler {
     }
 
     public void playSound(Player player) {
-    final YamlConfiguration config = fileManager.getYamlConfig();
+        final YamlConfiguration config = fileManager.getYamlConfig();
 
-    if (config.getBoolean("sounds.enabled")) {
-        String sound = config.getString("sounds.sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
-        float volume = (float) config.getDouble("sounds.volume", 1.0);
-        float pitch = (float) config.getDouble("sounds.pitch", 1.0);
-        try {
-            player.playSound(player.getLocation(), Sound.valueOf(sound.toUpperCase(Locale.ROOT)), volume, pitch);
-        } catch (Exception e) {
-            plugin.getLogger().warning("The sound " + sound + " does not exist in this Minecraft version!");
+        if (config.getBoolean("sounds.enabled")) {
+            String sound = config.getString("sounds.sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
+            float volume = (float) config.getDouble("sounds.volume", 1.0);
+            float pitch = (float) config.getDouble("sounds.pitch", 1.0);
+            try {
+                player.playSound(player.getLocation(), Sound.valueOf(sound.toUpperCase(Locale.ROOT)), volume, pitch);
+            } catch (Exception e) {
+                plugin.getLogger().warning("The sound " + sound + " does not exist in this Minecraft version!");
+            }
         }
+    }
+
+    public boolean spawnExists() {
+        if (spawnLocation == null || spawnLocation.getWorld() == null) {
+            spawnLocation = loadSpawn();
+        }
+
+        return spawnLocation != null && spawnLocation.getWorld() != null;
+    }
+
+    private boolean isLocationConfigValid() {
+        final ConfigFile locationFile = fileManager.getLocation();
+
+        return locationFile.containsIgnoreDefault(WORLD_KEY)
+                && locationFile.containsIgnoreDefault(X_KEY)
+                && locationFile.containsIgnoreDefault(Y_KEY)
+                && locationFile.containsIgnoreDefault(Z_KEY)
+                && locationFile.containsIgnoreDefault(YAW_KEY)
+                && locationFile.containsIgnoreDefault(PITCH_KEY);
     }
 }
