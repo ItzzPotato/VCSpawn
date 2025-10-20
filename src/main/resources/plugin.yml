@@ -23,3 +23,5 @@ permissions:
     default: op
   spawn.bypass.cancel-on-move:
     default: op
+  spawn.reload:
+    default: op

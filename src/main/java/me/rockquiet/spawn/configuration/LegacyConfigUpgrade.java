@@ -54,7 +54,10 @@ public class LegacyConfigUpgrade {
                         Function.identity(),
                         key -> legacyFileConfig.getConfigurationSection(MESSAGES_SECTION).get(key)
                 ));
-        messagesMap.remove("config-reload");
+        Object reloadMessage = messagesMap.remove("config-reload");
+        if (reloadMessage != null) {
+            messagesMap.put("reload", reloadMessage);
+        }
         upgradeSection(fileManager.getMessages(), messagesMap, "");
 
         final Map<String, Object> locationMap = legacyFileConfig.getConfigurationSection(LOCATION_SECTION).getKeys(false)
