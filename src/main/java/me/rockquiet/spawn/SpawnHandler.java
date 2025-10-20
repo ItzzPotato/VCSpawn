@@ -8,9 +8,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -28,7 +30,8 @@ public class SpawnHandler {
     private final Messages messageManager;
 
     private Location spawnLocation;
-    private final Set<UUID> recentlyTeleportedPlayers = new HashSet<>();
+    private final Set<UUID> worldChangeSkipPlayers = new HashSet<>();
+    private final Map<UUID, Long> recentTeleportTimestamps = new HashMap<>();
 
     public SpawnHandler(Spawn plugin, FileManager fileManager, Messages messageManager) {
         this.plugin = plugin;
@@ -201,15 +204,35 @@ public class SpawnHandler {
     }
 
     private void markRecentlyTeleported(Player player) {
-        recentlyTeleportedPlayers.add(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+        worldChangeSkipPlayers.add(uuid);
+        recentTeleportTimestamps.put(uuid, System.currentTimeMillis());
     }
 
     public boolean shouldSkipWorldChangeCheck(Player player) {
-        return recentlyTeleportedPlayers.remove(player.getUniqueId());
+        return worldChangeSkipPlayers.remove(player.getUniqueId());
+    }
+
+    public boolean wasTeleportedRecently(Player player, long durationMillis) {
+        UUID uuid = player.getUniqueId();
+        Long lastTeleport = recentTeleportTimestamps.get(uuid);
+        if (lastTeleport == null) {
+            return false;
+        }
+
+        long now = System.currentTimeMillis();
+        if (now - lastTeleport <= durationMillis) {
+            return true;
+        }
+
+        recentTeleportTimestamps.remove(uuid);
+        return false;
     }
 
     public void clearRecentlyTeleported(Player player) {
-        recentlyTeleportedPlayers.remove(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+        worldChangeSkipPlayers.remove(uuid);
+        recentTeleportTimestamps.remove(uuid);
     }
 
     private boolean isLocationConfigValid() {
