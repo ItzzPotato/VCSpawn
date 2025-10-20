@@ -8,8 +8,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public class SpawnHandler {
 
@@ -25,6 +30,8 @@ public class SpawnHandler {
     private final Messages messageManager;
 
     private Location spawnLocation;
+    private final Set<UUID> worldChangeSkipPlayers = new HashSet<>();
+    private final Map<UUID, Long> recentTeleportTimestamps = new HashMap<>();
 
     public SpawnHandler(Spawn plugin, FileManager fileManager, Messages messageManager) {
         this.plugin = plugin;
@@ -119,13 +126,14 @@ public class SpawnHandler {
             player.setFallDistance(0F);
         }
 
+        Location destination = spawnLocation;
         if (config.getBoolean("use-player-head-rotation.enabled")) {
-            Location location = spawnLocation.clone();
-            location.setDirection(player.getLocation().getDirection());
-            player.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
-        } else {
-            player.teleport(spawnLocation, PlayerTeleportEvent.TeleportCause.PLUGIN);
+            destination = spawnLocation.clone();
+            destination.setDirection(player.getLocation().getDirection());
         }
+
+        markRecentlyTeleported(player);
+        player.teleport(destination, PlayerTeleportEvent.TeleportCause.PLUGIN);
 
         spawnParticles(player);
         playSound(player);
@@ -193,6 +201,38 @@ public class SpawnHandler {
         }
 
         return spawnLocation != null && spawnLocation.getWorld() != null;
+    }
+
+    private void markRecentlyTeleported(Player player) {
+        UUID uuid = player.getUniqueId();
+        worldChangeSkipPlayers.add(uuid);
+        recentTeleportTimestamps.put(uuid, System.currentTimeMillis());
+    }
+
+    public boolean shouldSkipWorldChangeCheck(Player player) {
+        return worldChangeSkipPlayers.remove(player.getUniqueId());
+    }
+
+    public boolean wasTeleportedRecently(Player player, long durationMillis) {
+        UUID uuid = player.getUniqueId();
+        Long lastTeleport = recentTeleportTimestamps.get(uuid);
+        if (lastTeleport == null) {
+            return false;
+        }
+
+        long now = System.currentTimeMillis();
+        if (now - lastTeleport <= durationMillis) {
+            return true;
+        }
+
+        recentTeleportTimestamps.remove(uuid);
+        return false;
+    }
+
+    public void clearRecentlyTeleported(Player player) {
+        UUID uuid = player.getUniqueId();
+        worldChangeSkipPlayers.remove(uuid);
+        recentTeleportTimestamps.remove(uuid);
     }
 
     private boolean isLocationConfigValid() {

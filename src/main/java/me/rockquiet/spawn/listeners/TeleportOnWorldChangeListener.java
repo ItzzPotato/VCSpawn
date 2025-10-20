@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class TeleportOnWorldChangeListener implements Listener {
 
@@ -30,8 +31,17 @@ public class TeleportOnWorldChangeListener implements Listener {
         onWorldChange(event.getPlayer(), true);
     }
 
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        spawnHandler.clearRecentlyTeleported(event.getPlayer());
+    }
+
     private void onWorldChange(Player player, boolean isJoining) {
         YamlConfiguration config = fileManager.getYamlConfig();
+
+        if (spawnHandler.shouldSkipWorldChangeCheck(player)) {
+            return;
+        }
 
         if (player.hasPermission("spawn.bypass.world-change-teleport") || !config.getBoolean("teleport-on-world-change.enabled")) {
             return;
