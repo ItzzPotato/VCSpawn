@@ -8,8 +8,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
 
 public class SpawnHandler {
 
@@ -25,6 +28,7 @@ public class SpawnHandler {
     private final Messages messageManager;
 
     private Location spawnLocation;
+    private final Set<UUID> recentlyTeleportedPlayers = new HashSet<>();
 
     public SpawnHandler(Spawn plugin, FileManager fileManager, Messages messageManager) {
         this.plugin = plugin;
@@ -119,13 +123,14 @@ public class SpawnHandler {
             player.setFallDistance(0F);
         }
 
+        Location destination = spawnLocation;
         if (config.getBoolean("use-player-head-rotation.enabled")) {
-            Location location = spawnLocation.clone();
-            location.setDirection(player.getLocation().getDirection());
-            player.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
-        } else {
-            player.teleport(spawnLocation, PlayerTeleportEvent.TeleportCause.PLUGIN);
+            destination = spawnLocation.clone();
+            destination.setDirection(player.getLocation().getDirection());
         }
+
+        markRecentlyTeleported(player);
+        player.teleport(destination, PlayerTeleportEvent.TeleportCause.PLUGIN);
 
         spawnParticles(player);
         playSound(player);
@@ -193,6 +198,18 @@ public class SpawnHandler {
         }
 
         return spawnLocation != null && spawnLocation.getWorld() != null;
+    }
+
+    private void markRecentlyTeleported(Player player) {
+        recentlyTeleportedPlayers.add(player.getUniqueId());
+    }
+
+    public boolean shouldSkipWorldChangeCheck(Player player) {
+        return recentlyTeleportedPlayers.remove(player.getUniqueId());
+    }
+
+    public void clearRecentlyTeleported(Player player) {
+        recentlyTeleportedPlayers.remove(player.getUniqueId());
     }
 
     private boolean isLocationConfigValid() {
