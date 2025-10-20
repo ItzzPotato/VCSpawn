@@ -86,7 +86,7 @@ public class LegacyConfigUpgrade {
         values.put("teleport-on-first-join", "teleport-on-join.only-first-join");
         values.put("cancel-on-move", "teleport-delay.cancel-on-move");
         values.put("teleport-out-of-void", "teleport-out-of-void.enabled");
-        values.put("void-check-height", "teleport-out-of-void.check-height");
+        values.put("void-check-height", "teleport-out-of-void.lower-limit");
         values.put("teleport-on-respawn", "teleport-on-respawn.enabled");
         values.put("ignore-bed-spawn", "teleport-on-respawn.ignore-bed-spawn");
         values.put("particle", "particles.particle");

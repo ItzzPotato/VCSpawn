@@ -52,8 +52,16 @@ public class TeleportOutOfVoidListener implements Listener {
             return;
         }
 
-        int checkHeight = config.getInt("teleport-out-of-void.check-height", -64);
-        if (!isDescendingIntoVoid(from, to, checkHeight)) {
+        int lowerLimit = config.getInt(
+                "teleport-out-of-void.lower-limit",
+                config.getInt("teleport-out-of-void.check-height", -64)
+        );
+        int upperLimit = config.getInt("teleport-out-of-void.upper-limit", 2048);
+        if (upperLimit <= lowerLimit) {
+            upperLimit = lowerLimit + 1;
+        }
+
+        if (!isDescendingOutsideBounds(from, to, lowerLimit, upperLimit)) {
             return;
         }
 
@@ -61,7 +69,7 @@ public class TeleportOutOfVoidListener implements Listener {
         spawnHandler.teleportPlayer(player);
     }
 
-    private boolean isDescendingIntoVoid(Location from, Location to, int checkHeight) {
+    private boolean isDescendingOutsideBounds(Location from, Location to, int lowerLimit, int upperLimit) {
         if (to.getWorld() == null) {
             return false;
         }
@@ -70,7 +78,8 @@ public class TeleportOutOfVoidListener implements Listener {
             return false;
         }
 
-        if (to.getY() > checkHeight) {
+        double toY = to.getY();
+        if (toY > lowerLimit && toY < upperLimit) {
             return false;
         }
 

@@ -17,7 +17,8 @@ teleport-on-world-change:
 
 teleport-out-of-void:
   enabled: true
-  check-height: -32
+  lower-limit: -32
+  upper-limit: 2048
 
 fall-damage:
   enabled: false
